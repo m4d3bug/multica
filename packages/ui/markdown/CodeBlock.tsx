@@ -1,5 +1,9 @@
 import * as React from 'react'
-import { codeToHtml, bundledLanguages, type BundledLanguage } from 'shiki'
+// Shiki is loaded lazily inside highlight(): importing it statically inlines
+// ~11 MB of language/theme definitions into every chunk that touches this
+// module, and on Cloudflare Workers that top-level evaluation blows the
+// script startup CPU budget (error 10021).
+import type { BundledLanguage } from 'shiki'
 import { Copy, Check } from "@multica/ui/icons"
 import { useTranslation } from "react-i18next"
 import { Button } from "@multica/ui/components/ui/button"
@@ -47,7 +51,7 @@ function getCacheKey(code: string, lang: string): string {
   return `${lang}:${code}`
 }
 
-function isValidLanguage(lang: string): lang is BundledLanguage {
+function isValidLanguage(lang: string, bundledLanguages: Record<string, unknown>): lang is BundledLanguage {
   const normalized = LANGUAGE_ALIASES[lang] || lang
   return normalized in bundledLanguages
 }
@@ -92,8 +96,12 @@ export function CodeBlock({
       }
 
       try {
+        // Dynamic import keeps Shiki's full language/theme registry out of
+        // the bundle's top-level evaluation path (see note at the imports).
+        const { codeToHtml, bundledLanguages } = await import('shiki')
+
         // Use valid language or fallback to plaintext
-        const lang = isValidLanguage(resolvedLang) ? resolvedLang : 'text'
+        const lang = isValidLanguage(resolvedLang, bundledLanguages) ? resolvedLang : 'text'
 
         // Dual themes: Shiki outputs CSS variables for both themes in one pass.
         // CSS handles switching via .dark selector (see globals.css).
