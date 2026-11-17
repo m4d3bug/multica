@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "mdx": "fumadocs-mdx",
-    "postinstall": "fumadocs-mdx"
+    "postinstall": "fumadocs-mdx",
+    "cf:build": "opennextjs-cloudflare build"
   },
   "dependencies": {
     "@multica/core": "workspace:*",
@@ -27,7 +28,8 @@
     "react-dom": "catalog:",
     "shadcn": "catalog:",
     "tw-animate-css": "catalog:",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@neondatabase/serverless": "1.2.1"
   },
   "devDependencies": {
     "@multica/eslint-config": "workspace:*",
@@ -44,6 +46,7 @@
     "jsdom": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@opennextjs/cloudflare": "1.20.17"
   }
 }
