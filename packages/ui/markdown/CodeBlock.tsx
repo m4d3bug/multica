@@ -96,9 +96,16 @@ export function CodeBlock({
       }
 
       try {
-        // Dynamic import keeps Shiki's full language/theme registry out of
-        // the bundle's top-level evaluation path (see note at the imports).
-        const { codeToHtml, bundledLanguages } = await import('shiki')
+        // Shiki is loaded from a CDN at runtime (browser only). Bundling it
+        // would inline ~11 MB of language/theme data into the server bundle,
+        // which pushes the Cloudflare Worker startup CPU over its hard limit.
+        // The `as string` + turbopackIgnore keep TS and Turbopack from
+        // resolving the URL; types come from the local package.
+        const cdn = 'https://cdn.jsdelivr.net/npm/shiki@3.21.0/+esm' as string
+        const { codeToHtml, bundledLanguages } = (await import(
+          /* turbopackIgnore: true */
+          cdn
+        )) as typeof import('shiki')
 
         // Use valid language or fallback to plaintext
         const lang = isValidLanguage(resolvedLang, bundledLanguages) ? resolvedLang : 'text'
